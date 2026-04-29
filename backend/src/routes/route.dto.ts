@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
+/** Tipos de vehículo permitidos. */
 export const vehicleTypes = ['CAMION', 'TRACTOMULA', 'FURGONETA', 'MOTO_CARGO'] as const;
+
+/** Estados posibles de una ruta. */
 export const routeStatuses = ['ACTIVA', 'INACTIVA', 'SUSPENDIDA', 'EN_MANTENIMIENTO'] as const;
 
+/** Validación para crear una ruta. Status por defecto: ACTIVA. */
 export const createRouteSchema = z.object({
   originCity: z.string().min(2).max(100).trim(),
   destinationCity: z.string().min(2).max(100).trim(),
@@ -16,10 +20,12 @@ export const createRouteSchema = z.object({
 
 export type CreateRouteDto = z.infer<typeof createRouteSchema>;
 
+/** Validación para actualizar una ruta. Todos los campos son opcionales. */
 export const updateRouteSchema = createRouteSchema.partial();
 
 export type UpdateRouteDto = z.infer<typeof updateRouteSchema>;
 
+/** Validación de filtros y paginación del listado. */
 export const routeFilterSchema = z.object({
   originCity: z.string().optional(),
   destinationCity: z.string().optional(),
@@ -34,6 +40,7 @@ export const routeFilterSchema = z.object({
 
 export type RouteFilterDto = z.infer<typeof routeFilterSchema>;
 
+/** Ruta formateada para la respuesta del API (camelCase). */
 export interface RouteResponse {
   id: string;
   originCity: string;
@@ -49,6 +56,7 @@ export interface RouteResponse {
   updatedAt: string;
 }
 
+/** Respuesta paginada con metadatos. */
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: {
@@ -59,6 +67,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
+/** Resultado de importación CSV con detalle de errores por fila. */
 export interface ImportResult {
   imported: number;
   failed: number;

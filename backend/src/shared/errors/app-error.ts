@@ -1,7 +1,4 @@
-/**
- * Base application error with HTTP status code.
- * Extend this class for domain-specific errors.
- */
+/** Error base con statusCode HTTP. Los errores de negocio heredan de esta clase. */
 export class AppError extends Error {
   constructor(
     public readonly statusCode: number,
@@ -12,6 +9,7 @@ export class AppError extends Error {
   }
 }
 
+/** Recurso no encontrado (404). */
 export class NotFoundError extends AppError {
   constructor(resource: string, id?: string) {
     super(404, id ? `${resource} with id '${id}' not found` : `${resource} not found`);
@@ -19,6 +17,7 @@ export class NotFoundError extends AppError {
   }
 }
 
+/** Conflicto, por ejemplo username duplicado (409). */
 export class ConflictError extends AppError {
   constructor(message: string) {
     super(409, message);
@@ -26,6 +25,7 @@ export class ConflictError extends AppError {
   }
 }
 
+/** Credenciales inválidas o token ausente (401). */
 export class UnauthorizedError extends AppError {
   constructor(message = 'Invalid credentials') {
     super(401, message);
@@ -33,6 +33,7 @@ export class UnauthorizedError extends AppError {
   }
 }
 
+/** Permisos insuficientes (403). */
 export class ForbiddenError extends AppError {
   constructor(message = 'Access denied') {
     super(403, message);
@@ -40,6 +41,7 @@ export class ForbiddenError extends AppError {
   }
 }
 
+/** Datos de entrada inválidos (400). */
 export class BadRequestError extends AppError {
   constructor(message: string) {
     super(400, message);

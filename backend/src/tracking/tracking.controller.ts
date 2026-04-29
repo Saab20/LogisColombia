@@ -4,11 +4,7 @@ import { trackRoute } from './tracking.adapter';
 
 const router = Router();
 
-/**
- * GET /api/tracking/:routeId
- * Get real-time tracking data for a route.
- * Consumes the SOAP tracking service via the TrackingAdapter.
- */
+/** GET /api/tracking/:routeId — Datos de rastreo en tiempo real para una ruta. */
 router.get('/:routeId', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const routeId = req.params.routeId as string;

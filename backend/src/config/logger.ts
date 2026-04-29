@@ -1,10 +1,7 @@
 import pino from 'pino';
 import { env } from './env';
 
-/**
- * Structured logger with pino.
- * Uses correlation-id for request tracing.
- */
+/** Logger estructurado con pino. Silenciado en tests, JSON en producción. */
 export const logger = pino({
   level: env.NODE_ENV === 'test' ? 'silent' : 'info',
   transport:

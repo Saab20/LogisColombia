@@ -12,10 +12,7 @@ declare global {
   }
 }
 
-/**
- * Middleware to verify JWT token on protected routes.
- * Extracts user info from the token and attaches it to req.user.
- */
+/** Verifica el token JWT del header Authorization y adjunta el usuario a req.user. */
 export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers.authorization;
@@ -36,10 +33,7 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction): 
   }
 };
 
-/**
- * Middleware factory to restrict access by role.
- * @param roles Allowed roles for the endpoint
- */
+/** Restringe acceso por rol. Ejemplo: authorize('ADMIN') solo deja pasar admins. */
 export const authorize = (...roles: string[]) => {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {

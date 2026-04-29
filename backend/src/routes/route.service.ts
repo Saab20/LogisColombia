@@ -15,11 +15,7 @@ import {
 import * as routeRepository from './route.repository';
 import { RouteRow } from './route.repository';
 
-/**
- * Map a database row to the API response format.
- * @param row Database route row
- * @returns Formatted route response
- */
+/** Convierte un registro de BD (snake_case) al formato del API (camelCase). */
 const toResponse = (row: RouteRow): RouteResponse => ({
   id: row.id,
   originCity: row.origin_city,
@@ -35,11 +31,7 @@ const toResponse = (row: RouteRow): RouteResponse => ({
   updatedAt: row.updated_at.toISOString(),
 });
 
-/**
- * Get paginated list of routes with optional filters.
- * @param filters Pagination and filter parameters
- * @returns Paginated route response
- */
+/** Lista rutas con paginación y filtros. */
 export const findAll = async (
   filters: RouteFilterDto
 ): Promise<PaginatedResponse<RouteResponse>> => {
@@ -56,9 +48,8 @@ export const findAll = async (
 };
 
 /**
- * Get a single route by ID.
- * @param id Route UUID
- * @returns Route response
+ * Obtiene una ruta por UUID.
+ * @throws {NotFoundError} Si no existe.
  */
 export const findById = async (id: string): Promise<RouteResponse> => {
   const row = await routeRepository.findById(id);
@@ -68,21 +59,15 @@ export const findById = async (id: string): Promise<RouteResponse> => {
   return toResponse(row);
 };
 
-/**
- * Create a new route.
- * @param dto Route creation data
- * @returns Created route response
- */
+/** Crea una ruta nueva. */
 export const create = async (dto: CreateRouteDto): Promise<RouteResponse> => {
   const row = await routeRepository.create(dto);
   return toResponse(row);
 };
 
 /**
- * Update an existing route.
- * @param id Route UUID
- * @param dto Partial route update data
- * @returns Updated route response
+ * Actualiza parcialmente una ruta.
+ * @throws {NotFoundError} Si no existe.
  */
 export const update = async (id: string, dto: UpdateRouteDto): Promise<RouteResponse> => {
   const existing = await routeRepository.findById(id);
@@ -97,9 +82,8 @@ export const update = async (id: string, dto: UpdateRouteDto): Promise<RouteResp
 };
 
 /**
- * Soft delete a route (set is_active = false).
- * @param id Route UUID
- * @returns Deactivated route response
+ * Soft delete: marca la ruta como INACTIVA sin borrarla.
+ * @throws {NotFoundError} Si no existe.
  */
 export const softDelete = async (id: string): Promise<RouteResponse> => {
   const existing = await routeRepository.findById(id);
@@ -114,10 +98,8 @@ export const softDelete = async (id: string): Promise<RouteResponse> => {
 };
 
 /**
- * Import routes from a CSV buffer.
- * Validates each row before persisting.
- * @param buffer CSV file buffer
- * @returns Import summary with success/failure counts
+ * Importa rutas desde un CSV. Valida cada fila y reporta errores sin detener la importación.
+ * @throws {BadRequestError} Si el CSV está vacío.
  */
 export const importFromCsv = async (buffer: Buffer): Promise<ImportResult> => {
   const records: Record<string, string>[] = await new Promise((resolve, reject) => {
@@ -145,7 +127,7 @@ export const importFromCsv = async (buffer: Buffer): Promise<ImportResult> => {
 
   for (let i = 0; i < records.length; i++) {
     const record = records[i];
-    const rowNumber = i + 2; // +2 because row 1 is header, data starts at row 2
+    const rowNumber = i + 2;
 
     try {
       const dto = createRouteSchema.parse({
@@ -170,37 +152,23 @@ export const importFromCsv = async (buffer: Buffer): Promise<ImportResult> => {
   return { imported, failed: errors.length, errors };
 };
 
-/**
- * Get dashboard statistics: routes by status.
- * @returns Array of { status, count }
- */
+/** Estadísticas de rutas agrupadas por estado. */
 export const getStatsByStatus = async () => {
   return routeRepository.getStatsByStatus();
 };
 
-/**
- * Get top 5 routes by cost.
- * @returns Array of route responses
- */
+/** Top 5 rutas por costo. */
 export const getTopByCost = async (): Promise<RouteResponse[]> => {
   const rows = await routeRepository.getTopByCost(5);
   return rows.map(toResponse);
 };
 
-/**
- * Get active routes grouped by region (origin city).
- * @returns Array of { city, count }
- */
+/** Rutas activas agrupadas por ciudad de origen. */
 export const getActiveRoutesByRegion = async () => {
   return routeRepository.getActiveRoutesByRegion();
 };
 
-/**
- * Get route statistics filtered by date range.
- * @param startDate ISO date string
- * @param endDate ISO date string
- * @returns Stats by status within the date range
- */
+/** Estadísticas filtradas por rango de fechas. */
 export const getStatsByDateRange = async (startDate: string, endDate: string) => {
   return routeRepository.getStatsByDateRange(startDate, endDate);
 };

@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Attach a correlation-id to every request for distributed tracing.
- * Uses the incoming X-Correlation-ID header or generates a new UUID.
- */
+/** Asigna un correlation ID a cada request. Reutiliza el header si ya viene, si no genera uno nuevo. */
 export const correlationIdMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
   req.correlationId = correlationId;

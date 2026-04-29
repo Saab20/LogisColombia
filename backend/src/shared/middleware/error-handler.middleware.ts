@@ -4,9 +4,9 @@ import { logger } from '../../config/logger';
 import { AppError } from '../errors/app-error';
 
 /**
- * Centralized error handler middleware.
- * Maps known error types to semantic HTTP status codes.
- * Never exposes stack traces to the client.
+ * Manejo centralizado de errores.
+ * AppError → su statusCode. ZodError → 400 con detalles. Otros → 500 genérico.
+ * Nunca expone stack traces al cliente.
  */
 export const errorHandler = (
   err: Error,

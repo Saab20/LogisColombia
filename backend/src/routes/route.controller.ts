@@ -5,9 +5,11 @@ import { createRouteSchema, updateRouteSchema, routeFilterSchema } from './route
 import * as routeService from './route.service';
 
 const router = Router();
+
+/** Upload CSV: en memoria, máximo 5MB, solo archivos .csv. */
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype !== 'text/csv' && !file.originalname.endsWith('.csv')) {
       cb(new Error('Only CSV files are allowed'));
@@ -17,10 +19,7 @@ const upload = multer({
   },
 });
 
-/**
- * GET /api/routes
- * List all routes with pagination and filters.
- */
+/** GET /api/routes — Lista rutas con paginación y filtros opcionales. */
 router.get('/', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filters = routeFilterSchema.parse(req.query);
@@ -31,10 +30,7 @@ router.get('/', authenticate, async (req: Request, res: Response, next: NextFunc
   }
 });
 
-/**
- * GET /api/routes/stats
- * Get dashboard statistics (routes by status).
- */
+/** GET /api/routes/stats — Conteo de rutas agrupadas por estado. */
 router.get('/stats', authenticate, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const stats = await routeService.getStatsByStatus();
@@ -44,10 +40,7 @@ router.get('/stats', authenticate, async (_req: Request, res: Response, next: Ne
   }
 });
 
-/**
- * GET /api/routes/top-cost
- * Get top 5 routes by cost.
- */
+/** GET /api/routes/top-cost — Top 5 rutas más costosas. */
 router.get('/top-cost', authenticate, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const routes = await routeService.getTopByCost();
@@ -57,10 +50,7 @@ router.get('/top-cost', authenticate, async (_req: Request, res: Response, next:
   }
 });
 
-/**
- * GET /api/routes/by-region
- * Get active routes grouped by origin city.
- */
+/** GET /api/routes/by-region — Rutas activas agrupadas por ciudad de origen. */
 router.get('/by-region', authenticate, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await routeService.getActiveRoutesByRegion();
@@ -70,10 +60,7 @@ router.get('/by-region', authenticate, async (_req: Request, res: Response, next
   }
 });
 
-/**
- * GET /api/routes/stats-by-date
- * Get route statistics filtered by date range.
- */
+/** GET /api/routes/stats-by-date — Stats filtradas por rango de fechas (startDate, endDate requeridos). */
 router.get('/stats-by-date', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { startDate, endDate } = req.query;
@@ -91,10 +78,7 @@ router.get('/stats-by-date', authenticate, async (req: Request, res: Response, n
   }
 });
 
-/**
- * GET /api/routes/:id
- * Get a single route by ID.
- */
+/** GET /api/routes/:id — Detalle de una ruta por UUID. */
 router.get('/:id', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const route = await routeService.findById(req.params.id as string);
@@ -104,10 +88,7 @@ router.get('/:id', authenticate, async (req: Request, res: Response, next: NextF
   }
 });
 
-/**
- * POST /api/routes
- * Create a new route (ADMIN only).
- */
+/** POST /api/routes — Crea una ruta nueva. Solo ADMIN. */
 router.post(
   '/',
   authenticate,
@@ -123,10 +104,7 @@ router.post(
   }
 );
 
-/**
- * POST /api/routes/import
- * Import routes from CSV file (ADMIN only).
- */
+/** POST /api/routes/import — Importa rutas desde CSV. Solo ADMIN. Máx 5MB. */
 router.post(
   '/import',
   authenticate,
@@ -146,10 +124,7 @@ router.post(
   }
 );
 
-/**
- * PUT /api/routes/:id
- * Update an existing route (ADMIN only).
- */
+/** PUT /api/routes/:id — Actualiza parcialmente una ruta. Solo ADMIN. */
 router.put(
   '/:id',
   authenticate,
@@ -165,10 +140,7 @@ router.put(
   }
 );
 
-/**
- * DELETE /api/routes/:id
- * Soft delete a route (ADMIN only).
- */
+/** DELETE /api/routes/:id — Soft delete: marca la ruta como INACTIVA. Solo ADMIN. */
 router.delete(
   '/:id',
   authenticate,

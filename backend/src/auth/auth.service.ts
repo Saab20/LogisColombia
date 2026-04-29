@@ -5,12 +5,12 @@ import { UnauthorizedError, ConflictError } from '../shared/errors/app-error';
 import { LoginDto, RegisterDto, JwtPayload, AuthResponse } from './auth.dto';
 import * as authRepository from './auth.repository';
 
+/** Factor de costo para bcrypt (12 ≈ 250ms por hash). */
 const BCRYPT_COST_FACTOR = 12;
 
 /**
- * Authenticate a user with username and password.
- * @param dto Login credentials
- * @returns JWT token and user info
+ * Verifica credenciales y genera un token JWT.
+ * @throws {UnauthorizedError} Si el usuario no existe o la contraseña es incorrecta.
  */
 export const login = async (dto: LoginDto): Promise<AuthResponse> => {
   const user = await authRepository.findByUsername(dto.username);
@@ -35,18 +35,13 @@ export const login = async (dto: LoginDto): Promise<AuthResponse> => {
 
   return {
     token,
-    user: {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    },
+    user: { id: user.id, username: user.username, role: user.role },
   };
 };
 
 /**
- * Register a new user.
- * @param dto Registration data
- * @returns JWT token and user info
+ * Crea un usuario, hashea la contraseña y devuelve token JWT.
+ * @throws {ConflictError} Si el username ya existe.
  */
 export const register = async (dto: RegisterDto): Promise<AuthResponse> => {
   const existingUser = await authRepository.findByUsername(dto.username);
@@ -69,10 +64,6 @@ export const register = async (dto: RegisterDto): Promise<AuthResponse> => {
 
   return {
     token,
-    user: {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    },
+    user: { id: user.id, username: user.username, role: user.role },
   };
 };

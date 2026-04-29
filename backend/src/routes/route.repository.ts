@@ -1,6 +1,7 @@
 import { query } from '../config/database';
 import { RouteFilterDto } from './route.dto';
 
+/** Registro de ruta tal como viene de la BD (snake_case). */
 export interface RouteRow {
   id: string;
   origin_city: string;
@@ -16,11 +17,7 @@ export interface RouteRow {
   updated_at: Date;
 }
 
-/**
- * Find all routes with pagination and filters.
- * @param filters Pagination and filter parameters
- * @returns Paginated route rows and total count
- */
+/** Lista rutas con paginación y filtros dinámicos. */
 export const findAll = async (
   filters: RouteFilterDto
 ): Promise<{ rows: RouteRow[]; total: number }> => {
@@ -29,27 +26,27 @@ export const findAll = async (
   let paramIndex = 1;
 
   if (filters.originCity) {
-    conditions.push(`origin_city ILIKE $${paramIndex}`);
+    conditions.push(`origin_city ILIKE ${paramIndex}`);
     params.push(`%${filters.originCity}%`);
     paramIndex++;
   }
   if (filters.destinationCity) {
-    conditions.push(`destination_city ILIKE $${paramIndex}`);
+    conditions.push(`destination_city ILIKE ${paramIndex}`);
     params.push(`%${filters.destinationCity}%`);
     paramIndex++;
   }
   if (filters.vehicleType) {
-    conditions.push(`vehicle_type = $${paramIndex}`);
+    conditions.push(`vehicle_type = ${paramIndex}`);
     params.push(filters.vehicleType);
     paramIndex++;
   }
   if (filters.status) {
-    conditions.push(`status = $${paramIndex}`);
+    conditions.push(`status = ${paramIndex}`);
     params.push(filters.status);
     paramIndex++;
   }
   if (filters.carrier) {
-    conditions.push(`carrier ILIKE $${paramIndex}`);
+    conditions.push(`carrier ILIKE ${paramIndex}`);
     params.push(`%${filters.carrier}%`);
     paramIndex++;
   }
@@ -64,27 +61,20 @@ export const findAll = async (
   const total = parseInt(countResult.rows[0].total, 10);
 
   const dataResult = await query(
-    `SELECT * FROM routes ${whereClause} ORDER BY ${filters.sortBy} ${filters.sortOrder} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+    `SELECT * FROM routes ${whereClause} ORDER BY ${filters.sortBy} ${filters.sortOrder} LIMIT ${paramIndex} OFFSET ${paramIndex + 1}`,
     [...params, filters.limit, offset]
   );
 
   return { rows: dataResult.rows, total };
 };
 
-/**
- * Find a single route by ID.
- * @param id Route UUID
- * @returns The route row or null
- */
+/** Busca una ruta por UUID. Retorna null si no existe. */
 export const findById = async (id: string): Promise<RouteRow | null> => {
   const result = await query('SELECT * FROM routes WHERE id = $1', [id]);
   return result.rows[0] || null;
 };
 
-/**
- * Insert a new route into the database.
- * @returns The created route row
- */
+/** Inserta una ruta nueva. */
 export const create = async (data: {
   originCity: string;
   destinationCity: string;
@@ -113,12 +103,7 @@ export const create = async (data: {
   return result.rows[0];
 };
 
-/**
- * Update an existing route.
- * @param id Route UUID
- * @param data Partial route data to update
- * @returns The updated route row or null
- */
+/** Actualiza solo los campos enviados. Actualiza updated_at automáticamente. */
 export const update = async (
   id: string,
   data: Partial<{
@@ -149,7 +134,7 @@ export const update = async (
 
   for (const [key, value] of Object.entries(data)) {
     if (value !== undefined && fieldMap[key]) {
-      setClauses.push(`${fieldMap[key]} = $${paramIndex}`);
+      setClauses.push(`${fieldMap[key]} = ${paramIndex}`);
       params.push(value);
       paramIndex++;
     }
@@ -161,17 +146,13 @@ export const update = async (
   params.push(id);
 
   const result = await query(
-    `UPDATE routes SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    `UPDATE routes SET ${setClauses.join(', ')} WHERE id = ${paramIndex} RETURNING *`,
     params
   );
   return result.rows[0] || null;
 };
 
-/**
- * Soft delete a route by setting is_active to false and status to INACTIVA.
- * @param id Route UUID
- * @returns The updated route row or null
- */
+/** Soft delete: marca is_active = false y status = INACTIVA. */
 export const softDelete = async (id: string): Promise<RouteRow | null> => {
   const result = await query(
     `UPDATE routes SET is_active = false, status = 'INACTIVA', updated_at = NOW() WHERE id = $1 RETURNING *`,
@@ -180,11 +161,7 @@ export const softDelete = async (id: string): Promise<RouteRow | null> => {
   return result.rows[0] || null;
 };
 
-/**
- * Bulk insert routes (for CSV import).
- * @param routes Array of route data
- * @returns The created route row
- */
+/** Inserta una ruta (alias para importación masiva). */
 export const createBulk = async (data: {
   originCity: string;
   destinationCity: string;
@@ -198,10 +175,7 @@ export const createBulk = async (data: {
   return create(data);
 };
 
-/**
- * Get route statistics grouped by status.
- * @returns Array of { status, count }
- */
+/** Conteo de rutas agrupadas por estado. */
 export const getStatsByStatus = async (): Promise<Array<{ status: string; count: number }>> => {
   const result = await query(
     'SELECT status, COUNT(*)::int as count FROM routes GROUP BY status ORDER BY count DESC'
@@ -209,11 +183,7 @@ export const getStatsByStatus = async (): Promise<Array<{ status: string; count:
   return result.rows;
 };
 
-/**
- * Get top N routes by cost.
- * @param limit Number of routes to return
- * @returns Array of route rows ordered by cost descending
- */
+/** Top N rutas ordenadas por costo descendente. */
 export const getTopByCost = async (limit: number = 5): Promise<RouteRow[]> => {
   const result = await query(
     'SELECT * FROM routes ORDER BY cost_usd DESC LIMIT $1',
@@ -222,10 +192,7 @@ export const getTopByCost = async (limit: number = 5): Promise<RouteRow[]> => {
   return result.rows;
 };
 
-/**
- * Get route counts grouped by origin city (for heat map).
- * @returns Array of { city, count }
- */
+/** Rutas activas agrupadas por ciudad de origen. */
 export const getActiveRoutesByRegion = async (): Promise<Array<{ city: string; count: number }>> => {
   const result = await query(
     `SELECT origin_city as city, COUNT(*)::int as count 
@@ -237,12 +204,7 @@ export const getActiveRoutesByRegion = async (): Promise<Array<{ city: string; c
   return result.rows;
 };
 
-/**
- * Get route statistics filtered by date range.
- * @param startDate Start of the date range
- * @param endDate End of the date range
- * @returns Stats by status within the date range
- */
+/** Estadísticas por estado filtradas por rango de fechas. */
 export const getStatsByDateRange = async (
   startDate: string,
   endDate: string
