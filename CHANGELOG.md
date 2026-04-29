@@ -9,6 +9,8 @@ y este proyecto adhiere a [Versionamiento Semántico](https://semver.org/lang/es
 
 ### Agregado
 - Se creó colección de Postman con todos los endpoints del API (auth, routes, tracking, health, errores comunes) en `postmanCollections/`
+- Se configuró Jest como framework de testing del frontend reemplazando Karma/Jasmine
+- Se crearon 103 pruebas unitarias con Jest para todos los componentes, servicios, guards e interceptores del frontend
 
 ### Cambiado
 - Se mejoró la barra de navegación para ser completamente responsive en mobile con menú hamburguesa animado y panel desplegable a pantalla completa
