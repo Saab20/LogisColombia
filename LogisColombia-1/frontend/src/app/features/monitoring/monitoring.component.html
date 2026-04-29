@@ -1,0 +1,62 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Monitoreo en Tiempo Real</h1>
+    <div class="refresh-info">
+      <span class="countdown">Actualización en {{ countdown() }}s</span>
+      <button class="btn btn-outline btn-sm" (click)="loadActiveRoutes()">🔄 Refrescar</button>
+    </div>
+  </div>
+
+  @if (lastRefresh()) {
+    <p class="last-refresh">Última actualización: {{ lastRefresh() | date:'HH:mm:ss' }}</p>
+  }
+
+  @if (loading() && monitoredRoutes().length === 0) {
+    <div class="loading-state">Cargando rutas activas...</div>
+  } @else {
+    <div class="monitoring-grid">
+      @for (route of monitoredRoutes(); track route.id) {
+        <div class="monitoring-card card">
+          <div class="card-header">
+            <div class="route-info">
+              <span class="route-path">{{ route.originCity }} → {{ route.destinationCity }}</span>
+              <span class="carrier">{{ route.carrier }} · {{ route.vehicleType }}</span>
+            </div>
+          </div>
+
+          @if (route.tracking) {
+            <div class="tracking-data">
+              <div class="location">
+                <span class="label">📍 Ubicación</span>
+                <span class="value">{{ route.tracking.lastLocation }}</span>
+              </div>
+
+              <div class="progress-section">
+                <div class="progress-header">
+                  <span class="label">Avance</span>
+                  <span class="percent">{{ route.tracking.progressPercent }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="route.tracking.progressPercent"
+                    [style.background]="getProgressColor(route.tracking.progressPercent)"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="eta">
+                <span class="label">⏱️ ETA</span>
+                <span class="value">{{ formatEta(route.tracking.etaMinutes) }}</span>
+              </div>
+            </div>
+          } @else {
+            <div class="no-tracking">Sin datos de rastreo</div>
+          }
+        </div>
+      } @empty {
+        <div class="empty-state">No hay rutas activas para monitorear</div>
+      }
+    </div>
+  }
+</div>
