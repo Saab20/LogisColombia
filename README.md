@@ -60,7 +60,7 @@ Plataforma web fullstack para **LogisColombia S.A.S.** que centraliza la gestió
 | Seguridad | Helmet · CORS explícito · Rate limiting |
 | Logging | Pino (structured logs con correlation-id) |
 | Migraciones | node-pg-migrate |
-| Testing | Jest · Supertest (backend) |
+| Testing | Jest · Supertest (backend) · Jest + jest-preset-angular (frontend) |
 | Integración SOAP | TrackingAdapter (mock con caché TTL 60s) |
 
 ## Requisitos Previos
@@ -269,6 +269,25 @@ trackroute/
 
 El archivo `backend/api-tests.http` contiene una colección completa para probar todos los endpoints con un cliente HTTP (VS Code REST Client, IntelliJ HTTP Client, etc.).
 
+## Pruebas Unitarias
+
+El proyecto cuenta con **169 pruebas unitarias** (66 backend + 103 frontend), todas con Jest. No requieren base de datos ni servicios externos.
+
+### Backend
+
+```bash
+cd backend
+npm test                     # Ejecutar todos los tests
+npm run test:coverage        # Ejecutar con reporte de cobertura
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm test                     # Ejecutar todos los tests
+npm run test:coverage        # Ejecutar con reporte de cobertura
+```
 ## Construido Con
 
 - [Angular 19](https://angular.dev/) — Framework frontend
