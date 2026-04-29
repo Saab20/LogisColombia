@@ -26,27 +26,27 @@ export const findAll = async (
   let paramIndex = 1;
 
   if (filters.originCity) {
-    conditions.push(`origin_city ILIKE ${paramIndex}`);
+    conditions.push(`origin_city ILIKE $${paramIndex}`);
     params.push(`%${filters.originCity}%`);
     paramIndex++;
   }
   if (filters.destinationCity) {
-    conditions.push(`destination_city ILIKE ${paramIndex}`);
+    conditions.push(`destination_city ILIKE $${paramIndex}`);
     params.push(`%${filters.destinationCity}%`);
     paramIndex++;
   }
   if (filters.vehicleType) {
-    conditions.push(`vehicle_type = ${paramIndex}`);
+    conditions.push(`vehicle_type = $${paramIndex}`);
     params.push(filters.vehicleType);
     paramIndex++;
   }
   if (filters.status) {
-    conditions.push(`status = ${paramIndex}`);
+    conditions.push(`status = $${paramIndex}`);
     params.push(filters.status);
     paramIndex++;
   }
   if (filters.carrier) {
-    conditions.push(`carrier ILIKE ${paramIndex}`);
+    conditions.push(`carrier ILIKE $${paramIndex}`);
     params.push(`%${filters.carrier}%`);
     paramIndex++;
   }
@@ -61,7 +61,7 @@ export const findAll = async (
   const total = parseInt(countResult.rows[0].total, 10);
 
   const dataResult = await query(
-    `SELECT * FROM routes ${whereClause} ORDER BY ${filters.sortBy} ${filters.sortOrder} LIMIT ${paramIndex} OFFSET ${paramIndex + 1}`,
+    `SELECT * FROM routes ${whereClause} ORDER BY ${filters.sortBy} ${filters.sortOrder} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
     [...params, filters.limit, offset]
   );
 
@@ -134,7 +134,7 @@ export const update = async (
 
   for (const [key, value] of Object.entries(data)) {
     if (value !== undefined && fieldMap[key]) {
-      setClauses.push(`${fieldMap[key]} = ${paramIndex}`);
+      setClauses.push(`${fieldMap[key]} = $${paramIndex}`);
       params.push(value);
       paramIndex++;
     }
@@ -146,7 +146,7 @@ export const update = async (
   params.push(id);
 
   const result = await query(
-    `UPDATE routes SET ${setClauses.join(', ')} WHERE id = ${paramIndex} RETURNING *`,
+    `UPDATE routes SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
     params
   );
   return result.rows[0] || null;
