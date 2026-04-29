@@ -4,14 +4,29 @@
       <span class="logo">🚛</span>
       <span class="brand-name">TrackRoute</span>
     </div>
-    <div class="navbar-links">
-      <a routerLink="/routes" routerLinkActive="active">Rutas</a>
-      <a routerLink="/monitoring" routerLinkActive="active">Monitoreo</a>
-      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    </div>
-    <div class="navbar-user">
-      <span class="user-info">{{ user()?.username }} ({{ user()?.role }})</span>
-      <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+
+    <button
+      type="button"
+      class="menu-toggle"
+      [class.open]="mobileMenuOpen()"
+      (click)="toggleMobileMenu()"
+      aria-label="Abrir menú de navegación"
+      [attr.aria-expanded]="mobileMenuOpen()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="navbar-menu" [class.open]="mobileMenuOpen()">
+      <div class="navbar-links">
+        <a routerLink="/routes" routerLinkActive="active" (click)="closeMobileMenu()">Rutas</a>
+        <a routerLink="/monitoring" routerLinkActive="active" (click)="closeMobileMenu()">Monitoreo</a>
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Dashboard</a>
+      </div>
+      <div class="navbar-user">
+        <span class="user-info">{{ user()?.username }} ({{ user()?.role }})</span>
+        <button type="button" class="btn-logout" (click)="logout()">Cerrar sesión</button>
+      </div>
     </div>
   </nav>
 }
