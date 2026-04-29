@@ -7,6 +7,34 @@
     </div>
   </div>
 
+  <!-- Filtros por ciudad -->
+  <div class="card filters-card">
+    <div class="filters-row">
+      <div class="form-group">
+        <label for="filterOrigin">Ciudad origen</label>
+        <input
+          id="filterOrigin"
+          type="text"
+          [(ngModel)]="filterOrigin"
+          placeholder="Ej: Bogotá"
+        />
+      </div>
+      <div class="form-group">
+        <label for="filterDestination">Ciudad destino</label>
+        <input
+          id="filterDestination"
+          type="text"
+          [(ngModel)]="filterDestination"
+          placeholder="Ej: Medellín"
+        />
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-primary btn-sm" (click)="applyFilters()">Filtrar</button>
+      <button class="btn btn-outline btn-sm" (click)="clearFilters()">Limpiar</button>
+    </div>
+  </div>
+
   @if (lastRefresh()) {
     <p class="last-refresh">Última actualización: {{ lastRefresh() | date:'HH:mm:ss' }}</p>
   }

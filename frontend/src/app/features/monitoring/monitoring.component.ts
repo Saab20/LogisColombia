@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouteService } from '../../core/services/route.service';
 import { Route, TrackingData } from '../../core/models/route.model';
 import { forkJoin } from 'rxjs';
@@ -11,23 +12,26 @@ interface MonitoredRoute extends Route {
 @Component({
   selector: 'app-monitoring',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './monitoring.component.html',
   styleUrl: './monitoring.component.scss',
 })
 export class MonitoringComponent implements OnInit, OnDestroy {
   private routeService = inject(RouteService);
   private intervalId: ReturnType<typeof setInterval> | null = null;
+  private countdownInterval: ReturnType<typeof setInterval> | null = null;
 
   monitoredRoutes = signal<MonitoredRoute[]>([]);
   loading = signal(false);
   lastRefresh = signal<Date | null>(null);
   countdown = signal(30);
-  private countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+  /** Filtros por ciudad. */
+  filterOrigin = '';
+  filterDestination = '';
 
   ngOnInit(): void {
     this.loadActiveRoutes();
-    // Auto-refresh every 30 seconds
     this.intervalId = setInterval(() => this.loadActiveRoutes(), 30000);
     this.countdownInterval = setInterval(() => {
       this.countdown.update((v) => (v <= 1 ? 30 : v - 1));
@@ -39,11 +43,17 @@ export class MonitoringComponent implements OnInit, OnDestroy {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
   }
 
+  /** Carga rutas activas con filtros opcionales y obtiene tracking de cada una. */
   loadActiveRoutes(): void {
     this.loading.set(true);
     this.countdown.set(30);
 
-    this.routeService.getRoutes({ status: 'ACTIVA', limit: 100 }).subscribe({
+    this.routeService.getRoutes({
+      status: 'ACTIVA',
+      limit: 100,
+      originCity: this.filterOrigin || undefined,
+      destinationCity: this.filterDestination || undefined,
+    }).subscribe({
       next: (response) => {
         const routes = response.data;
         if (routes.length === 0) {
@@ -74,6 +84,18 @@ export class MonitoringComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       },
     });
+  }
+
+  /** Aplica filtros y recarga. */
+  applyFilters(): void {
+    this.loadActiveRoutes();
+  }
+
+  /** Limpia filtros y recarga. */
+  clearFilters(): void {
+    this.filterOrigin = '';
+    this.filterDestination = '';
+    this.loadActiveRoutes();
   }
 
   getProgressColor(percent: number): string {
