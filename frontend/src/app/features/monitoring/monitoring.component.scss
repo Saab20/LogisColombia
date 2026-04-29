@@ -1,3 +1,40 @@
+.filters-card {
+  margin-bottom: 1rem;
+
+  .filters-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .form-group {
+      flex: 1;
+      min-width: 180px;
+
+      label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        color: var(--text-light);
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+}
+
 .refresh-info {
   display: flex;
   align-items: center;
@@ -95,5 +132,13 @@
 @media (max-width: 768px) {
   .monitoring-grid {
     grid-template-columns: 1fr;
+  }
+
+  .filters-card .filters-row {
+    flex-direction: column;
+
+    .form-group {
+      min-width: 100%;
+    }
   }
 }
