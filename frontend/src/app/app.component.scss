@@ -1,3 +1,5 @@
+$mobile-breakpoint: 768px;
+
 .navbar {
   display: flex;
   align-items: center;
@@ -17,6 +19,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    z-index: 1010;
 
     .logo {
       font-size: 1.5rem;
@@ -27,6 +30,50 @@
       font-size: 1.1rem;
       letter-spacing: 0.5px;
     }
+  }
+
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1010;
+
+    .bar {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    &.open {
+      .bar:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+      }
+
+      .bar:nth-child(2) {
+        opacity: 0;
+      }
+
+      .bar:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+      }
+    }
+  }
+
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    justify-content: space-between;
+    margin-left: 2rem;
   }
 
   .navbar-links {
@@ -76,6 +123,69 @@
       &:hover {
         background: #e94560;
         color: #fff;
+      }
+    }
+  }
+}
+
+// ── Mobile responsive ──
+@media (max-width: $mobile-breakpoint) {
+  .navbar {
+    flex-wrap: wrap;
+
+    .menu-toggle {
+      display: flex;
+    }
+
+    .navbar-menu {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #1a1a2e;
+      margin-left: 0;
+      padding: 1.5rem;
+      gap: 2rem;
+      justify-content: flex-start;
+      overflow-y: auto;
+
+      &.open {
+        display: flex;
+      }
+    }
+
+    .navbar-links {
+      flex-direction: column;
+      gap: 0.25rem;
+      width: 100%;
+
+      a {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border-radius: 8px;
+      }
+    }
+
+    .navbar-user {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+
+      .user-info {
+        font-size: 0.9rem;
+      }
+
+      .btn-logout {
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem;
+        font-size: 0.9rem;
       }
     }
   }
