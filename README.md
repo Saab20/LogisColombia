@@ -5,47 +5,47 @@ Plataforma web fullstack para **LogisColombia S.A.S.** que centraliza la gestió
 ## Diagrama de Arquitectura
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND (Angular 19)                    │
-│                        http://localhost:4200                    │
-│                                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌───────────┐  ┌───────────────┐  │
-│  │  Login   │  │  Rutas   │  │ Monitoreo │  │   Dashboard   │  │
-│  │          │  │  (CRUD)  │  │ (30s poll)│  │ (Indicadores) │  │
-│  └──────────┘  └──────────┘  └───────────┘  └───────────────┘  │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │  Core: AuthService · RouteService · Guards · Interceptors│   │
-│  └─────────────────────────────────────────────────────────┘    │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │ HTTP (JWT Bearer)
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   BACKEND (Node.js + Express + TypeScript)       │
-│                        http://localhost:3000                     │
-│                                                                 │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  Middleware: Helmet · CORS · RateLimit · Auth · Correlation│ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│  │ Auth Module  │  │ Routes Module│  │  Tracking Module     │  │
-│  │ controller   │  │ controller   │  │  controller          │  │
-│  │ service      │  │ service      │  │  adapter (SOAP mock) │  │
-│  │ repository   │  │ repository   │  │  cache (TTL 60s)     │  │
-│  │ dto (Zod)    │  │ dto (Zod)    │  │  dto                 │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────────────────────┘  │
-│         │                 │                                     │
-│         ▼                 ▼                                     │
-│  ┌─────────────────────────────┐    ┌────────────────────────┐  │
-│  │     PostgreSQL 15           │    │  Servicio SOAP Legado  │  │
-│  │     (Docker, puerto 5433)   │    │  (Mock / TrackingAdapter│ │
-│  │                             │    │   abstrae la comunicación│ │
-│  │  Tables: users, routes      │    └────────────────────────┘  │
-│  │  Indexes: origin, dest,     │                                │
-│  │    status, vehicle, carrier │                                │
-│  └─────────────────────────────┘                                │
-└─────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│              FRONTEND · Angular 19                │
+│              http://localhost:4200                 │
+│                                                   │
+│   Login    Rutas (CRUD)   Monitoreo   Dashboard   │
+│                                                   │
+│   AuthService · RouteService · Guards · HTTP      │
+└─────────────────────┬─────────────────────────────┘
+                      │ REST + JWT Bearer
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│              BACKEND · Node.js + Express + TS               │
+│              http://localhost:3000                           │
+│                                                             │
+│   Middleware: Helmet · CORS · RateLimit · Auth · CorrID     │
+│                                                             │
+│   ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐ │
+│   │    Auth      │  │    Routes    │  │     Tracking      │ │
+│   │  controller  │  │  controller  │  │    controller     │ │
+│   │  service     │  │  service     │  │  adapter (SOAP)   │ │
+│   │  repository  │  │  repository  │  │  cache (TTL 60s)  │ │
+│   │  dto (Zod)   │  │  dto (Zod)   │  │  dto              │ │
+│   └──────┬───────┘  └──────┬───────┘  └────────┬──────────┘ │
+│          │                 │                    │            │
+└──────────┼─────────────────┼────────────────────┼────────────┘
+           ▼                 ▼                    ▼
+  ┌─────────────────────────────────┐   ┌──────────────────┐
+  │        PostgreSQL 15            │   │  Servicio SOAP   │
+  │     Docker · puerto 5433        │   │  (mock actual,   │
+  │                                 │   │   WSDL en prod)  │
+  │  Tablas: users, routes          │   └──────────────────┘
+  │  Índices: origin, dest, status, │
+  │    vehicle, carrier, cost, date │
+  └─────────────────────────────────┘
+```
+
+### Flujo simplificado
+
+```
+Usuario → Angular (4200) → REST API (3000) → PostgreSQL
+                                           → SOAP Tracking (mock)
 ```
 
 ## Stack Tecnológico
@@ -137,19 +137,19 @@ Referencia completa en `backend/.env.example`:
 
 ## Decisiones de Arquitectura
 
-### PostgreSQL sobre MongoDB
+### PostgreSQL
 
 Los datos de rutas son inherentemente relacionales: tienen estructura fija (origen, destino, vehículo, transportista, costo, estado) y requieren filtros complejos por múltiples campos con paginación eficiente. PostgreSQL maneja esto nativamente con índices B-tree. MongoDB no aporta ventaja aquí — los datos son tabulares, no documentales.
 
-### Express sobre Fastify
+### Express
 
 Express tiene mayor ecosistema para integración SOAP en Node.js, más middleware maduro (helmet, cors, express-rate-limit), y es el estándar más documentado. Fastify gana en throughput puro, pero este proyecto no tiene requisitos de alta concurrencia que lo justifiquen.
 
-### Standalone Components sobre NgModules
+### Standalone Components
 
 Angular 17+ promueve standalone components como el estándar. Simplifican el lazy loading (cada ruta carga solo su componente), reducen boilerplate, y eliminan la necesidad de módulos intermedios. Todas las rutas usan `loadComponent()` para lazy loading.
 
-### Signals para manejo de estado (sin NgRx)
+### Signals para manejo de estado
 
 El estado de la aplicación es simple: usuario autenticado, lista de rutas paginada, datos de tracking. No hay flujos complejos que justifiquen NgRx. Angular Signals (v17+) proporcionan reactividad granular, son más ligeros, y están integrados nativamente en el framework. El `AuthService` usa signals para exponer `user`, `isAuthenticated` e `isAdmin` como estado reactivo.
 
@@ -157,11 +157,11 @@ El estado de la aplicación es simple: usuario autenticado, lista de rutas pagin
 
 El documento requiere que "el resto del sistema nunca debe conocer que hay SOAP detrás". El `TrackingAdapter` expone una interfaz TypeScript limpia (`trackRoute(routeId): Promise<TrackingResponse>`) con caché in-memory (TTL 60s). En producción se reemplazaría el mock por llamadas SOAP reales sin cambiar ningún consumidor.
 
-### Soft Delete en lugar de eliminación física
+### Soft Delete
 
 El documento lo requiere explícitamente. Las rutas nunca se eliminan de la base de datos — se marcan como `is_active = false` y `status = 'INACTIVA'`. Esto preserva el historial para auditoría y reportes.
 
-### sessionStorage sobre localStorage para tokens
+### sessionStorage
 
 Los tokens JWT se almacenan en `sessionStorage` en lugar de `localStorage`. `sessionStorage` se limpia al cerrar la pestaña, reduciendo la ventana de exposición si el equipo es compartido. En un entorno ideal se usarían cookies httpOnly, pero para esta implementación con CORS cross-origin, sessionStorage es el balance adecuado.
 
@@ -170,9 +170,9 @@ Los tokens JWT se almacenan en `sessionStorage` en lugar de `localStorage`. `ses
 1. **Servicio SOAP**: Se implementó como mock con respuestas determinísticas basadas en el routeId. En producción se conectaría al WSDL real sin cambiar la interfaz del adaptador.
 2. **Dataset**: El archivo `routes_dataset.csv` con 100 rutas se carga automáticamente con `npm run seed`. El seed es idempotente para los usuarios (usa `ON CONFLICT DO NOTHING`).
 3. **Autenticación**: El endpoint de registro está abierto en desarrollo. En producción debería protegerse con el guard de ADMIN.
-4. **Mapa de calor**: Se implementó como un componente visual simplificado (grid de celdas con opacidad proporcional al conteo) en lugar de un mapa geográfico real, como permite el documento.
-5. **Polling vs WebSockets**: El monitoreo usa polling cada 30 segundos como requiere el documento base. WebSockets sería una mejora opcional.
-6. **Puerto PostgreSQL**: Se usa el puerto 5433 en el host para evitar conflictos con instalaciones locales de PostgreSQL. Dentro de Docker el puerto interno sigue siendo 5432.
+4. **Mapa de calor**: Se implementó como un componente visual simplificado (grid de celdas con opacidad proporcional al conteo).
+5. **Polling vs WebSockets**: El monitoreo usa polling cada 30 segundos como requiere el documento base.
+
 
 ## Estructura del Proyecto
 
@@ -298,7 +298,3 @@ npm run test:coverage        # Ejecutar con reporte de cobertura
 - [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) — Autenticación JWT
 - [bcrypt](https://github.com/kelektiv/node.bcrypt.js) — Hash de contraseñas
 - [node-pg-migrate](https://github.com/salsita/node-pg-migrate) — Migraciones de base de datos
-
-## Autor
-
-Desarrollado como solución al reto fullstack de LogisColombia S.A.S.
