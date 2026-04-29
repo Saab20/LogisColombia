@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 dotenv.config();
 
+/** Valida todas las variables de entorno al arrancar. Si falta alguna, la app no inicia. */
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -24,4 +25,5 @@ if (!parsed.success) {
   process.exit(1);
 }
 
+/** Variables de entorno validadas y tipadas. */
 export const env = parsed.data;

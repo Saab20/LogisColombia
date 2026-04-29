@@ -5,8 +5,8 @@ import * as authService from './auth.service';
 const router = Router();
 
 /**
- * POST /api/auth/login
- * Authenticate user and return JWT token.
+ * POST /api/auth/login — Valida credenciales y devuelve un token JWT.
+ * Rate limit: máximo 5 intentos por minuto por IP.
  */
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -19,8 +19,8 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
 });
 
 /**
- * POST /api/auth/register
- * Register a new user (ADMIN only in production, open in dev).
+ * POST /api/auth/register — Crea un usuario nuevo y devuelve token JWT.
+ * Público en desarrollo; en producción debería restringirse a ADMIN.
  */
 router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
   try {

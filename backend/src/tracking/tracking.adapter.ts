@@ -2,15 +2,10 @@ import { TrackingResponse } from './tracking.dto';
 import { logger } from '../config/logger';
 import { env } from '../config/env';
 
-/**
- * In-memory cache for SOAP tracking responses.
- * TTL is configurable via SOAP_CACHE_TTL_SECONDS env var.
- */
+/** Caché en memoria con TTL configurable para respuestas de tracking. */
 const cache = new Map<string, { data: TrackingResponse; expiresAt: number }>();
 
-/**
- * Colombian cities used for mock location generation.
- */
+/** Ciudades colombianas para ubicaciones mock. */
 const COLOMBIAN_CITIES = [
   'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Cartagena',
   'Bucaramanga', 'Pereira', 'Manizales', 'Santa Marta', 'Ibagué',
@@ -18,12 +13,7 @@ const COLOMBIAN_CITIES = [
   'Armenia', 'Popayán', 'Sincelejo', 'Valledupar', 'Tunja',
 ];
 
-/**
- * Generate a deterministic but varied mock response based on routeId.
- * Simulates what the real SOAP service would return.
- * @param routeId The route identifier
- * @returns Mock tracking data
- */
+/** Genera respuesta mock determinística basada en el routeId. */
 const generateMockResponse = (routeId: string): TrackingResponse => {
   const hash = routeId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const cityIndex = hash % COLOMBIAN_CITIES.length;
@@ -40,12 +30,8 @@ const generateMockResponse = (routeId: string): TrackingResponse => {
 };
 
 /**
- * TrackingAdapter abstracts the SOAP tracking service communication.
- * The rest of the system never knows there is SOAP behind this interface.
- * Uses an in-memory cache with configurable TTL.
- *
- * In production, this would make actual SOAP calls.
- * Currently uses a mock that generates deterministic responses.
+ * Obtiene datos de tracking para una ruta. Usa caché con TTL.
+ * En producción se reemplazaría el mock por la llamada SOAP real.
  */
 export const trackRoute = async (routeId: string): Promise<TrackingResponse> => {
   const cached = cache.get(routeId);
@@ -58,9 +44,6 @@ export const trackRoute = async (routeId: string): Promise<TrackingResponse> => 
 
   logger.info({ routeId }, 'Fetching tracking data (mock SOAP)');
 
-  // In production, this would be:
-  // const soapClient = await createClientAsync(env.SOAP_TRACKING_URL);
-  // const [result] = await soapClient.TrackRouteAsync({ routeId });
   const response = generateMockResponse(routeId);
 
   cache.set(routeId, {
@@ -71,9 +54,7 @@ export const trackRoute = async (routeId: string): Promise<TrackingResponse> => 
   return response;
 };
 
-/**
- * Clear the tracking cache. Useful for testing.
- */
+/** Limpia el caché. Se usa en tests. */
 export const clearCache = (): void => {
   cache.clear();
 };
