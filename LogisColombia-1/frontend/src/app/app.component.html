@@ -1,0 +1,21 @@
+@if (isAuthenticated()) {
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="logo">🚛</span>
+      <span class="brand-name">TrackRoute</span>
+    </div>
+    <div class="navbar-links">
+      <a routerLink="/routes" routerLinkActive="active">Rutas</a>
+      <a routerLink="/monitoring" routerLinkActive="active">Monitoreo</a>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    </div>
+    <div class="navbar-user">
+      <span class="user-info">{{ user()?.username }} ({{ user()?.role }})</span>
+      <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
+}
+
+<main [class.with-nav]="isAuthenticated()">
+  <router-outlet />
+</main>
