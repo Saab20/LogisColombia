@@ -1,6 +1,0 @@
-{
-  "databaseUrl": {"ENV": "DATABASE_URL"},
-  "migrationsDir": "migrations",
-  "direction": "up",
-  "verbose": true
-}
