@@ -201,7 +201,6 @@ trackroute/
 │   │   └── server.ts              # Entry point con graceful shutdown
 │   ├── migrations/                # Migraciones PostgreSQL
 │   ├── routes_dataset.csv         # Dataset de 100 rutas de Colombia
-│   ├── api-tests.http             # Colección de pruebas HTTP
 │   ├── .env.example
 │   └── package.json
 ├── frontend/
@@ -267,7 +266,6 @@ trackroute/
 
 ## Pruebas de Endpoints
 
-El archivo `backend/api-tests.http` contiene una colección completa para probar todos los endpoints con un cliente HTTP (VS Code REST Client, IntelliJ HTTP Client, etc.).
 
 ## Pruebas Unitarias
 
