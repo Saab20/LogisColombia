@@ -180,17 +180,17 @@ Los tokens JWT se almacenan en `sessionStorage` en lugar de `localStorage`. `ses
 trackroute/
 ├── backend/
 │   ├── src/
-│   │   ├── auth/                  # Módulo de autenticación (RF-04)
+│   │   ├── auth/                  # Módulo de autenticación
 │   │   │   ├── auth.controller.ts
 │   │   │   ├── auth.service.ts
 │   │   │   ├── auth.repository.ts
 │   │   │   └── auth.dto.ts
-│   │   ├── routes/                # Módulo de rutas (RF-01, RF-03, RF-05)
+│   │   ├── routes/                # Módulo de rutas
 │   │   │   ├── route.controller.ts
 │   │   │   ├── route.service.ts
 │   │   │   ├── route.repository.ts
 │   │   │   └── route.dto.ts
-│   │   ├── tracking/              # Módulo de rastreo SOAP (RF-02)
+│   │   ├── tracking/              # Módulo de rastreo SOAP
 │   │   │   ├── tracking.controller.ts
 │   │   │   ├── tracking.adapter.ts   # Abstracción del servicio SOAP
 │   │   │   └── tracking.dto.ts
